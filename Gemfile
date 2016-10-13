@@ -44,10 +44,11 @@ gem 'bootstrap-sass', '3.3'
 gem 'autoprefixer-rails'
 gem 'dotenv-rails', '~> 2.1', require: 'dotenv/rails-now'
 gem 'rails_12factor', group: :production
-gem "ood_appkit", '~> 0.3.0'
-gem 'pbs', '~> 2.0'
 gem "turbolinks"
 gem "jquery-datatables-rails", '~> 3.3'
 
 # For pretty-printing memory values
 gem "filesize", '~> 0.1'
+
+gem "ood_appkit", '~> 0.3.0'
+gem 'pbs', '~> 2.0'
