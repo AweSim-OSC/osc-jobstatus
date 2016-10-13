@@ -4,18 +4,10 @@
 // this MUST occur before you import bootstrap
 @import "ood_appkit/bootstrap-overrides";
 
-// Awesim styles
-@import "awesim";
-
 // Load up bootstrap style sheet
 @import "bootstrap";
 
 @import "ood_appkit";
-
-// display header at top of app layout
-body {
-  @extend .awesim-banner-background-img;
-}
 
 // Your custom css styles below (must be manually added)
 @import "pages";

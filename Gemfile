@@ -52,4 +52,3 @@ gem "filesize", '~> 0.1'
 
 gem "ood_appkit", '~> 0.3.0'
 gem 'pbs', '~> 2.0'
-gem 'awesim_branding', '~> 0.0.1', :git => "https://github.com/AweSim-OSC/awesim_branding.git"
