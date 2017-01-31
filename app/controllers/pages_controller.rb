@@ -80,9 +80,6 @@ class PagesController < ApplicationController
       if cookies[:jobfilter] == 'all'
         # Get all jobs
         result = b.get_jobs
-      elsif cookies[:jobfilter] == 'group'
-        # Get all group jobs
-        result = b.get_jobs.select { |id, attr| attr[:egroup] == get_usergroup }
       else
         # Get all user jobs
         result = b.get_jobs.select { |id, attr| attr[:Job_Owner] =~ /^#{get_username}@/ }
@@ -100,9 +97,9 @@ class PagesController < ApplicationController
       end
     end
 
-    # Sort jobs by username, then group
+    # Sort user's jobs to the top
     jobs.sort_by! do |user|
-      user.username == get_username ? 0 : user.group == get_usergroup ? 1 : 2
+      user.username == get_username ? 0 : 1
     end
   end
 end
