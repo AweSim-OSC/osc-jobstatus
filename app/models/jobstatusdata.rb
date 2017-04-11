@@ -24,23 +24,28 @@ class Jobstatusdata
     self.account = info.accounting_id
     self.status = info.status.state
     self.cluster = cluster
-    self.walltime_used = info.wallclock_time > 0 ? pretty_time(info.wallclock_time) : ''
+    self.walltime_used = pretty_time(info.wallclock_time)
     self.queue = info.queue_name
+
     if info.status == :running || info.status == :completed
       self.nodes = node_array(info.allocated_nodes)
       self.starttime = info.dispatch_time.to_i
     end
+
     # TODO Find a better way to distingush whether a native parser is available. Maybe this is fine?
-    self.extended_available = OODClusters[cluster].job_config[:adapter] == "torque" || OODClusters[cluster].job_config[:adapter] == "slurm"
+    adapter_type = OODClusters[cluster] ? OODClusters[cluster].job_config.fetch(:adapter, nil) : nil
+    self.extended_available = adapter_type == "torque" || adapter_type == "slurm"
+
     if extended
-      if OODClusters[cluster].job_config[:adapter] == "torque"
+      if adapter_type == "torque"
         extended_data_torque(info)
-      elsif OODClusters[cluster].job_config[:adapter] == "slurm"
+      elsif adapter_type == "slurm"
         extended_data_slurm(info)
       else
         extended_data_default(info)
       end
     end
+
     self
   end
 
@@ -126,6 +131,8 @@ class Jobstatusdata
     # @param [Integer] The time in seconds
     # @return [String] The time as string formatted as "DDd HH:MM"
     def pretty_time(seconds)
+      return "" if seconds.to_i == 0
+
       duration=Array.new
       units=[ [":", 60*60], [":", 60], ["", 1] ]
       units.each do |value|
@@ -134,8 +141,7 @@ class Jobstatusdata
         seconds = unit[1]
       end
 
-      return duration.join('')
-
+      duration.join('')
     end
 
     # Converts the `allocated_nodes` object array into an array of node names

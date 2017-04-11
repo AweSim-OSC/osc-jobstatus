@@ -129,10 +129,14 @@ class JobstatussataTest < ActiveModel::TestCase
 
       @test_count += 1
     end
+  end # @clusters.each do |cluster|
 
-
+  test "wrap job info with only status and id set" do
+    # this is a simple test: just by doing this we confirm that nil values do not
+    # result in a crash when instantating this object
+    Jobstatusdata.new(OodCore::Job::Info.new(id: "123", status: :running), "cluster")
+    Jobstatusdata.new(OodCore::Job::Info.new(id: "123", status: :running), "cluster", true)
   end
-
 end
 
 
