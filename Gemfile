@@ -46,6 +46,7 @@ gem 'autoprefixer-rails'
 gem 'dotenv-rails', '~> 2.1', require: 'dotenv/rails-now'
 gem 'rails_12factor', group: :production
 gem 'ood_cluster', '~> 0.0.1'
+gem 'ood_core', git: 'https://github.com/OSC/ood_core.git', branch: 'fix_bjobs_parsing_lsf9_1'
 gem 'ood_appkit', '~> 1.0'
 gem 'pbs', '~> 2.0'
 gem 'jquery-datatables-rails', '~> 3.3'
