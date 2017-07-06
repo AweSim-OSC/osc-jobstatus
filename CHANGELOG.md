@@ -1,5 +1,7 @@
 # Unreleased
 
+* Show cluster errors as a dismissable bootstrap alert
+
 # v1.4.5
 
 * Add and use the cluster_title where appropriate in views instead of titleized cluster id
