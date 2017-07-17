@@ -32,6 +32,7 @@ $(document).ready( function() {
         ajax: APP_PATH + '/json?' + get_request_params(),    // 'pages#json'
         "sAjaxDataProp": function(response){
             var data_time = new Date().getTime();
+            console.log("Server benchmarks (ms): " + response.benchmark);
             console.log("Got data from server in: " + (data_time - start_time) + " ms");
           if(response.errors.length > 0) {
               show_errors(response.errors);
