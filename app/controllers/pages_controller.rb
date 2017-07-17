@@ -93,10 +93,16 @@ class PagesController < ApplicationController
     jobfilter = get_filter
     jobcluster = get_cluster
 
+    time_start = Integer(DateTime.now.strftime('%Q'))
+    time_objects = 0
+    time_adapters = 0
+    time_filter = 0
+
     OODClusters.each do |cluster|
 
       if jobcluster == 'all' || cluster == OODClusters[jobcluster]
 
+        ta = Integer(DateTime.now.strftime('%Q'))
         b = cluster.job_adapter
 
         begin
@@ -106,17 +112,23 @@ class PagesController < ApplicationController
             filter = Filter.list.find { |f| f.filter_id == jobfilter }
             result = filter ? filter.apply(b.info_all) : b.info_all
           end
+          tb = Integer(DateTime.now.strftime('%Q'))
+          time_adapters += tb - ta
 
           # Only add the running jobs to the list and assign the host to the object.
           #
           # There is also curently a bug in the system where jobs with an empty array
           # (ex. 6407991[].oak-batch.osc.edu) are not stattable, so we do a not-match
           # for those jobs and don't display them.
+
+          t1 = Integer(DateTime.now.strftime('%Q'))
           result.each do |j|
             if j.status.state != :completed && j.id !~ /\[\]/
               jobs.push(Jobstatusdata.new(j, cluster))
             end
           end
+          t2 = Integer(DateTime.now.strftime('%Q'))
+          time_objects += t2 - t1
         rescue => e
           msg = "#{cluster.metadata.title || cluster.id.to_s.titleize}: #{e.message}"
           logger.error "#{e.class}: #{e.message}\n#{e.backtrace.join("\n")}"
@@ -125,11 +137,16 @@ class PagesController < ApplicationController
       end
     end
 
+    t3 = Integer(DateTime.now.strftime('%Q'))
     # Sort jobs by username
     jobs.sort_by! do |user|
       user.username == OodSupport::User.new.name ? 0 : 1
     end
+    t4 =  Integer(DateTime.now.strftime('%Q'))
+    time_filter += t4 - t3
+    t5 = Integer(DateTime.now.strftime('%Q'))
+    time_total = t5 - time_start
 
-    { data: jobs, errors: errors }
+    { data: jobs, errors: errors, benchmark: "Time to get adapters: #{time_adapters}; Time to get objects: #{time_objects}; Time to filter user: #{time_filter}; Total server time: #{time_total}" }
   end
 end

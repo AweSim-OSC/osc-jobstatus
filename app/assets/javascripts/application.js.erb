@@ -24,11 +24,15 @@ var APP_PATH = window.location.pathname;
 $(document).ready( function() {
     $("#selected-filter-label").text($("#filter-id-"+filter_id).text());
     $("#selected-cluster-label").text($("#cluster-id-"+cluster_id).text());
+    var start_time = new Date().getTime();
+    console.log("Starting at: " + start_time);
 
     $("#" + filter_id).addClass("active");
     var table = $('#job_status_table').DataTable({
         ajax: APP_PATH + '/json?' + get_request_params(),    // 'pages#json'
         "sAjaxDataProp": function(response){
+            var data_time = new Date().getTime();
+            console.log("Got data from server in: " + (data_time - start_time) + " ms");
           if(response.errors.length > 0) {
               show_errors(response.errors);
           }
@@ -55,6 +59,8 @@ $(document).ready( function() {
                                                 oSettings.aoData[i].nTr.className += " bg-info";
                                             }
                                         }
+                                        var complete_time = new Date().getTime();
+                                        console.log("Frontend operations complete in: " + (complete_time - start_time ) + " ms");
                                     },
         processing: true,           // Add the "processing" while json is being downloaded.
         columns: [
