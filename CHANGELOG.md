@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Upcoming
+
+### Added
+
+- Show Node list for running jobs
+
 ## [v1.5.0] - 2017-07-17
 
 ### Added
