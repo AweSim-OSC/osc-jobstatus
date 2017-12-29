@@ -39,25 +39,6 @@ class ConfigurationSingleton
     to_bool(ENV.fetch('OOD_LOAD_EXTERNAL_CONFIG', (rails_env == 'production')))
   end
 
-  # Custom job templates source directory in /etc/.../activejobs/templates
-  # Defaults to APPROOT/templates if that directory exists or if
-  # not in production.
-  #
-  # @return [Pathname] path to templates root
-  def templates_path
-    default = app_root.join('templates')
-
-    if (! default.directory?) && load_external_config?
-      config_root.join("templates")
-    else
-      default
-    end
-  end
-
-  def show_job_options_account_field?
-    to_bool(ENV.fetch('OOD_SHOW_JOB_OPTIONS_ACCOUNT_FIELD', true))
-  end
-
   # Load the dotenv local files first, then the /etc dotenv files and
   # the .env and .env.production or .env.development files.
   #
@@ -90,11 +71,6 @@ class ConfigurationSingleton
     end
 
     Pathname.new(root).expand_path
-  end
-
-  def production_database_path
-    # FIXME: add support/handling for DATABASE_URL
-    ENV["DATABASE_PATH"] || dataroot.join('production.sqlite3').to_s
   end
 
   private
