@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Migrated from build-time configuration to runtime configuration.
+
 ## [1.5.3] - 2017-11-27
 ### Changed
 - Updated to Rails 4.2.10 to better support Ruby 2.4.
