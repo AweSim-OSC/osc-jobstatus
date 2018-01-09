@@ -2,10 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
-
-### Changed
-
-- Migrated from build-time configuration to runtime configuration.
+### Added
+- Added global configuration support.
+  [#151](https://github.com/OSC/ood-activejobs/issues/151)
 
 ## [1.5.3] - 2017-11-27
 ### Changed
