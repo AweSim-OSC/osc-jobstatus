@@ -64,9 +64,8 @@ Explorer and Shell apps installed and a cluster config added to
 
 - Active Jobs displays in a table the jobs currently submitted to the batch
   server.
-- It displays a list of filters, one for each tab. Each filter has a title
-  (Your Jobs, All Jobs, etc.) and is applied server side to the results of
-  qstat.
+- The table of jobs can be filtered using the provided filters in the dropdowns
+  located in the top right.
 - The data is retrieved via an Ajax request but to get updated data you must
   refresh the page.
 - Progressive disclosure is used to show details of a job. Click on the "right
