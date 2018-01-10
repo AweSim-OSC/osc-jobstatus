@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Added global configuration support.
   [#151](https://github.com/OSC/ood-activejobs/issues/151)
-- Display nodes job is running on if available.
+- Display list of nodes that a job is running on if available.
   [#141](https://github.com/OSC/ood-activejobs/issues/141)
 
 ### Changed
