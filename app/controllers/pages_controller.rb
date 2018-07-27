@@ -8,7 +8,7 @@ class PagesController < ApplicationController
   
   # Used to show single job details
   def show
-    @data = get_job(params[:pbsid], get_cluster)
+    @data = get_job(params[:pbsid], params[:cluster])
   end
   
   # Used to send the data to the Datatable.
