@@ -4,6 +4,10 @@ JobStatus::Application.routes.draw do
   #get "pages/about"
   get "/json" => "pages#json", :defaults => { :format => 'json' }
   delete "/delete_job" => "pages#delete_job"
+  get "errors/not_found"
+  get "errors/internal_server_error"
+  match "/404", :to => "errors#not_found", :via => :all
+  match "/500", :to => "errors#internal_server_error", :via => :all
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
