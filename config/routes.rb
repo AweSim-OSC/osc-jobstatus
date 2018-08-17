@@ -2,11 +2,15 @@ JobStatus::Application.routes.draw do
   root "pages#index"
   get "pages/index"
   get ":cluster/:pbsid" => "pages#show", :pbsid => /[0-9]+\.[a-z]+-[a-z]+\.ten\.osc\.edu|[0-9]+/, as: "show"
-  #get "pages/about"
   get "/json" => "pages#json", :defaults => { :format => 'json' }
   delete "/delete_job" => "pages#delete_job"
   put "/hold_job" => "pages#hold_job"
   put "/release_job" => "pages#release_job"
+  get "errors/not_found"
+  get "errors/internal_server_error"
+  match "/404", :to => "errors#not_found", :via => :all
+  match "/500", :to => "errors#internal_server_error", :via => :all
+  #get "pages/about"
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
