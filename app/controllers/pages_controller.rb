@@ -5,7 +5,12 @@ class PagesController < ApplicationController
     @jobfilter = get_filter
     @jobcluster = get_cluster
   end
-
+  
+  # Used to show single job details
+  def show
+    @data = get_job(params[:pbsid], params[:cluster])
+  end
+  
   # Used to send the data to the Datatable.
   def json
     if params[:pbsid].nil?
