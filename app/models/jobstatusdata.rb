@@ -7,7 +7,7 @@
 # @version 0.0.1
 class Jobstatusdata
   include ApplicationHelper
-  attr_reader :pbsid, :jobname, :username, :account, :status, :cluster, :cluster_title, :nodes, :starttime, :walltime, :walltime_used, :submit_args, :output_path, :nodect, :ppn, :total_cpu, :queue, :cput, :mem, :vmem, :shell_url, :file_explorer_url, :extended_available, :native_attribs, :error
+  attr_reader :pbsid, :jobname, :username, :account, :status, :cluster, :cluster_title, :nodes, :starttime, :walltime, :walltime_used, :submit_args, :output_path, :nodect, :ppn, :total_cpu, :queue, :cput, :mem, :vmem, :shell_url, :file_explorer_url, :extended_available, :native_attribs, :error, :status_text
 
   Attribute = Struct.new(:name, :value)
 
@@ -28,6 +28,7 @@ class Jobstatusdata
     self.jobname = info.job_name
     self.username = info.job_owner
     self.account = info.accounting_id || ''
+    self.status_text = info.status.state.to_s
     self.status = status_label(info.status.state.to_s)
     self.cluster = cluster.id.to_s
     self.cluster_title = cluster.metadata.title ||  cluster.id.to_s.titleize
@@ -258,6 +259,6 @@ class Jobstatusdata
       node_info_array.map { |n| n.name }
     end
 
-    attr_writer :pbsid, :jobname, :username, :account, :status, :cluster, :cluster_title, :nodes, :starttime, :walltime, :walltime_used, :submit_args, :output_path, :nodect, :ppn, :total_cpu, :queue, :cput, :mem, :vmem, :shell_url, :file_explorer_url, :extended_available, :native_attribs, :error
+    attr_writer :pbsid, :jobname, :username, :account, :status, :cluster, :cluster_title, :nodes, :starttime, :walltime, :walltime_used, :submit_args, :output_path, :nodect, :ppn, :total_cpu, :queue, :cput, :mem, :vmem, :shell_url, :file_explorer_url, :extended_available, :native_attribs, :error, :status_text
 
 end
