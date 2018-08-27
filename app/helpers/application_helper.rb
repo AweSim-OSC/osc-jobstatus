@@ -25,6 +25,6 @@ module ApplicationHelper
   end
   
   def support_url
-    ENV['OOD_DASHBOARD_SUPPORT_URL'] || "https://www.osc.edu/contact/supercomputing_support"
+    ENV['OOD_DASHBOARD_SUPPORT_URL']
   end
 end

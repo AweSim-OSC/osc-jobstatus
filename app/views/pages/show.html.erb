@@ -4,7 +4,7 @@
   </div>
 <% else %>
 <div class="show">
-    <%= render partial: 'pages/extended_panel.html.erb', :locals => {:data => @data, :page=>'show'} %>
+    <%= render partial: 'pages/extended_panel.html.erb', :locals => {:data => @data} %>
     <table id="showpage_nodes"></table>
    <%= link_to 'Back', root_path, class:["btn","btn-primary"],type:"button"%>
  </div>

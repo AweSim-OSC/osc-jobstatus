@@ -12,13 +12,9 @@
             <%= data.status %>
           </div>
         </div>
-        <div class="col-xs-11" style="word-wrap: break-word;"><%= data.jobname %>
-          <% if page=='index' %>
-            <div><%= link_to data.pbsid, show_path(cluster: data.native_attribs.select{|attrib| attrib.name=="Cluster"}[0].value.downcase , pbsid: data.pbsid.to_s) %></div>
-          <% elsif page=='show' %>
-             <div><%= data.pbsid %></div>
-             <div><%= @data.queue.capitalize %></div>
-          <% end %>
+        <div class="col-xs-11" style="word-wrap: break-word;">
+          <%= link_to "#{data.pbsid} - #{data.queue}", show_path(cluster: data.native_attribs.select{|attrib| attrib.name=="Cluster"}[0].value.downcase , pbsid: data.pbsid.to_s) %></br>
+          <%= data.jobname %>
         </div>
       </strong>
     </div>

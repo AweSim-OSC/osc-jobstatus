@@ -1,7 +1,7 @@
 JobStatus::Application.routes.draw do
   root "pages#index"
   get "pages/index"
-  get ":cluster/:pbsid" => "pages#show", :pbsid => /[0-9]+\.[a-z]+-[a-z]+\.ten\.osc\.edu|[0-9]+/, as: "show"
+  get ":cluster/:pbsid" => "pages#show", :pbsid => /.+\.osc\.edu|[0-9]+/, as: "show"
   get "/json" => "pages#json", :defaults => { :format => 'json' }
   delete "/delete_job" => "pages#delete_job"
   put "/hold_job" => "pages#hold_job"
