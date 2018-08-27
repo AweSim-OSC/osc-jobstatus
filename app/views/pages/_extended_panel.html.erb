@@ -12,8 +12,9 @@
             <%= data.status %>
           </div>
         </div>
-        <div class="col-xs-11" style="word-wrap: break-word;"><%= data.jobname %>
-          <div><%= data.pbsid %></div>
+        <div class="col-xs-11" style="word-wrap: break-word;">
+          <%= link_to "#{data.pbsid} - #{data.queue}", show_path(cluster: data.native_attribs.select{|attrib| attrib.name=="Cluster"}[0].value.downcase , pbsid: data.pbsid.to_s) %><br>
+          <%= data.jobname %>
         </div>
       </strong>
     </div>
@@ -50,6 +51,11 @@
             <%= link_to "#{icon("folder-open")} Open in File Manager".html_safe, data.file_explorer_url, :class => "btn btn-default", :target => "_blank", :style => "margin: 10px;" if data.file_explorer_url %>
             <%= link_to "#{icon("terminal")} Open in Terminal".html_safe, data.shell_url, :class => "btn btn-default", :target => "_blank", :style => "margin: 10px;" if data.shell_url %>
             <%= link_to "#{icon("trash-o")} Delete".html_safe, delete_job_path(pbsid: data.pbsid, cluster: data.cluster), :class => "btn btn-danger pull-right", :style => "margin: 10px;", data: { method: "delete", confirm: "Are you sure you want to delete #{data.pbsid}" } %>
+            <% if data.status_text =="queued" %>
+                <%= link_to "#{icon("pause")} Hold".html_safe, hold_job_path(pbsid: data.pbsid, cluster: data.cluster), :class => "btn btn-warning pull-right", :style => "margin: 10px;", data: { method: "put"} %>
+            <% elsif data.status_text =="queued_held" %>
+                <%= link_to "#{icon("play")} Release".html_safe, release_job_path(pbsid: data.pbsid, cluster: data.cluster), :class => "btn btn-warning pull-right", :style => "margin: 10px;", data: { method: "put"} %>
+            <% end %> 
         <% end %>
       </div>
     </div>
