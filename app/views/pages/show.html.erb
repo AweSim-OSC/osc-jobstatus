@@ -1,0 +1,15 @@
+<% if @data.error %>
+  <div class="alert alert-warning" role="alert">
+    <%= @data.error %>
+  </div>
+<% else %>
+<div class="show">
+    <%= render partial: 'pages/extended_panel.html.erb', :locals => {:data => @data} %>
+    <table id="showpage_nodes"></table>
+   <%= link_to 'Back', root_path, class:["btn","btn-primary"],type:"button"%>
+ </div>
+<% end %>
+<script>
+    var filter_id,cluster_id;
+    document.getElementById('showpage_nodes').insertAdjacentHTML('afterbegin', display_node_rows(<%= @data.to_json.html_safe %>));
+</script>

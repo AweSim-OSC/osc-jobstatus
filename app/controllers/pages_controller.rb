@@ -5,7 +5,12 @@ class PagesController < ApplicationController
     @jobfilter = get_filter
     @jobcluster = get_cluster
   end
-
+  
+  # Used to show single job details
+  def show
+    @data = get_job(params[:pbsid], params[:cluster])
+  end
+  
   # Used to send the data to the Datatable.
   def json
     if params[:pbsid].nil?
@@ -43,6 +48,44 @@ class PagesController < ApplicationController
       end
     else
       redirect_to root_url, :alert => "Failed to delete."
+    end
+  end
+  
+   def hold_job
+
+    # Only hold if the pbsid and host params are present and host is configured in servers.
+    # PBS will prevent a user from holding a job that is not their own and throw an error.
+    cluster = OODClusters[params[:cluster].to_sym]
+    if (params[:pbsid] && cluster)
+      job_id = params[:pbsid].to_s.gsub(/_/, '.')
+
+      begin
+        cluster.job_adapter.hold(job_id)
+        redirect_to :back, :notice => "Successfully held " + job_id
+      rescue
+        redirect_to :back, :alert => "Failed to hold " + job_id
+      end
+    else
+      redirect_to :back, :alert => "Failed to hold."
+    end
+  end
+  
+   def release_job
+
+    # Only release if the pbsid and host params are present and host is configured in servers.
+    # PBS will prevent a user from releasing a job that is not their own and throw an error.
+    cluster = OODClusters[params[:cluster].to_sym]
+    if (params[:pbsid] && cluster)
+      job_id = params[:pbsid].to_s.gsub(/_/, '.')
+
+      begin
+        cluster.job_adapter.release(job_id)
+        redirect_to :back, :notice => "Successfully released " + job_id
+      rescue
+        redirect_to :back, :alert => "Failed to release " + job_id
+      end
+    else
+      redirect_to :back, :alert => "Failed to release."
     end
   end
 
