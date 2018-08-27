@@ -33,7 +33,7 @@ class Jobstatusdata
     self.cluster = cluster.id.to_s
     self.cluster_title = cluster.metadata.title ||  cluster.id.to_s.titleize
     self.walltime_used = info.wallclock_time.to_i > 0 ? pretty_time(info.wallclock_time) : ''
-    self.walltime = info.wallclock_limit
+    self.walltime = pretty_time(info.wallclock_limit)
     self.queue = info.queue_name
     self.submission_time= info.submission_time
     if info.status == :running || info.status == :completed
@@ -74,7 +74,7 @@ class Jobstatusdata
     attributes.push Attribute.new "Job Name", self.jobname
     attributes.push Attribute.new "User", self.username
     attributes.push Attribute.new "Account", self.account
-    attributes.push Attribute.new "Walltime", pretty_time(self.walltime)
+    attributes.push Attribute.new "Walltime", self.walltime
     attributes.push Attribute.new "Walltime Used", self.walltime_used
     node_count = info.native.fetch(:Resource_List, {})[:nodect].to_i
     attributes.push Attribute.new "Node Count", node_count
@@ -185,7 +185,7 @@ class Jobstatusdata
     attributes.push Attribute.new "User", self.username
     attributes.push Attribute.new "Account", self.account if info.accounting_id
     attributes.push Attribute.new "Group List", info.native[:group_list] if info.native[:group_list]
-    attributes.push Attribute.new "Walltime", pretty_time(self.walltime)
+    attributes.push Attribute.new "Walltime", self.walltime
     walltime_used = info.wallclock_time || 0
     attributes.push Attribute.new "Walltime Used", self.walltime_used
     node_count = info.native.fetch(:Resource_List, {})[:nodect].to_i
