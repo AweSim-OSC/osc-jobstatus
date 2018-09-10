@@ -7,7 +7,7 @@
 # @version 0.0.1
 class Jobstatusdata
   include ApplicationHelper
-  attr_reader :pbsid, :jobname, :username, :account, :status, :cluster, :cluster_title, :nodes, :starttime, :walltime, :walltime_used, :submit_args, :output_path, :nodect, :ppn, :total_cpu, :queue, :cput, :mem, :vmem, :shell_url, :file_explorer_url, :extended_available, :native_attribs, :error
+  attr_reader :pbsid, :jobname, :username, :account, :status, :cluster, :cluster_title, :nodes, :starttime, :walltime, :walltime_used, :submit_args, :output_path, :nodect, :ppn, :total_cpu, :queue, :cput, :mem, :vmem, :shell_url, :file_explorer_url, :extended_available, :native_attribs, :error, :submission_time, :queued_time
 
   Attribute = Struct.new(:name, :value)
 
@@ -32,10 +32,15 @@ class Jobstatusdata
     self.cluster = cluster.id.to_s
     self.cluster_title = cluster.metadata.title ||  cluster.id.to_s.titleize
     self.walltime_used = info.wallclock_time.to_i > 0 ? pretty_time(info.wallclock_time) : ''
+    self.walltime = pretty_time(info.wallclock_limit)
     self.queue = info.queue_name
+    self.submission_time= info.submission_time
     if info.status == :running || info.status == :completed
       self.nodes = node_array(info.allocated_nodes).reject(&:blank?)
       self.starttime = info.dispatch_time.to_i
+      self.queued_time = starttime > 0 ? pretty_time(self.starttime- self.submission_time.to_i) : '';
+    else
+      self.queued_time = pretty_time(Time.now().to_i - self.submission_time.to_i)
     end
     self.extended_available = %w(torque slurm lsf pbspro).include?(cluster.job_config[:adapter])
     if extended
@@ -68,7 +73,7 @@ class Jobstatusdata
     attributes.push Attribute.new "Job Name", self.jobname
     attributes.push Attribute.new "User", self.username
     attributes.push Attribute.new "Account", self.account
-    attributes.push Attribute.new "Walltime", (info.native.fetch(:Resource_List, {})[:walltime].presence || "00:00:00")
+    attributes.push Attribute.new "Walltime", self.walltime
     attributes.push Attribute.new "Walltime Used", self.walltime_used
     node_count = info.native.fetch(:Resource_List, {})[:nodect].to_i
     attributes.push Attribute.new "Node Count", node_count
@@ -80,6 +85,8 @@ class Jobstatusdata
     attributes.push Attribute.new "Memory", info.native.fetch(:resources_used, {})[:mem].presence || "0 b"
     attributes.push Attribute.new "Virtual Memory", info.native.fetch(:resources_used, {})[:vmem].presence || "0 b"
     attributes.push Attribute.new "Comment", info.native[:comment] if info.native[:comment]
+    attributes.push Attribute.new "Submission Time", self.submission_time 
+    attributes.push Attribute.new "Queued Time", self.queued_time || "00:00:00"
     self.native_attribs = attributes
 
     self.submit_args = info.native[:submit_args].presence || "None"
@@ -115,6 +122,8 @@ class Jobstatusdata
     attributes.push Attribute.new "Time Limit", info.native[:time_limit]
     attributes.push Attribute.new "Time Used", info.native[:time_used]
     attributes.push Attribute.new "Memory", info.native[:min_memory]
+    attributes.push Attribute.new "Submission Time", self.submission_time
+    attributes.push Attribute.new "Queued Time", self.queued_time || "00:00:00"
     self.native_attribs = attributes
 
     self.submit_args = nil
@@ -175,7 +184,7 @@ class Jobstatusdata
     attributes.push Attribute.new "User", self.username
     attributes.push Attribute.new "Account", self.account if info.accounting_id
     attributes.push Attribute.new "Group List", info.native[:group_list] if info.native[:group_list]
-    attributes.push Attribute.new "Walltime", (info.native.fetch(:Resource_List, {})[:walltime].presence || "00:00:00")
+    attributes.push Attribute.new "Walltime", self.walltime
     walltime_used = info.wallclock_time || 0
     attributes.push Attribute.new "Walltime Used", self.walltime_used
     node_count = info.native.fetch(:Resource_List, {})[:nodect].to_i
@@ -190,6 +199,8 @@ class Jobstatusdata
     select = info.native.fetch(:Resource_List, {})[:select].presence
     attributes.push Attribute.new "Select", select if select
     attributes.push Attribute.new "Comment", info.native[:comment] || ''
+    attributes.push Attribute.new "Submission Time", self.submission_time
+    attributes.push Attribute.new "Queued Time", self.queued_time || "00:00:00"
     self.native_attribs = attributes
     self.submit_args = info.native[:Submit_arguments].presence || "None"
     self.output_path = info.native[:Output_Path].to_s.split(":").second || info.native[:Output_Path]
@@ -258,6 +269,6 @@ class Jobstatusdata
       node_info_array.map { |n| n.name }
     end
 
-    attr_writer :pbsid, :jobname, :username, :account, :status, :cluster, :cluster_title, :nodes, :starttime, :walltime, :walltime_used, :submit_args, :output_path, :nodect, :ppn, :total_cpu, :queue, :cput, :mem, :vmem, :shell_url, :file_explorer_url, :extended_available, :native_attribs, :error
+    attr_writer :pbsid, :jobname, :username, :account, :status, :cluster, :cluster_title, :nodes, :starttime, :walltime, :walltime_used, :submit_args, :output_path, :nodect, :ppn, :total_cpu, :queue, :cput, :mem, :vmem, :shell_url, :file_explorer_url, :extended_available, :native_attribs, :error, :submission_time, :queued_time
 
 end
