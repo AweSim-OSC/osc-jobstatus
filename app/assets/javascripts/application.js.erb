@@ -161,6 +161,9 @@ $(document).ready( function() {
                 $( "div[data-jobid='"+row.data().pbsid+"']").hide().html(data.html).fadeIn(250);
                 // Update the status label in the parent row
                 tr.find(".status-label").html(data.status);
+                // add tooltip to time in queue
+                $('strong:contains("Time in Queue")').append( " <i class='fa fa-info-circle' data-toggle='tooltip' data-placement='bottom' title='This value was calculated by current time or start time from submission time. If the job entered into a suspended or held or other non-queued state during this time, this value could be incorrect.'></i>")
+                $('[data-toggle="tooltip"]').tooltip(); 
             })
               .fail(function(jqXHR, textStatus, errorThrown) {
                   var error_panel = '<div class="alert alert-danger" role="alert">' +
@@ -171,7 +174,6 @@ $(document).ready( function() {
               });
         }
     });
-
     table.columns.adjust().draw();
 });
 
@@ -255,3 +257,4 @@ function set_cluster_id(id) {
 function reload_page() {
     window.location = '?' + get_request_params();
 }
+

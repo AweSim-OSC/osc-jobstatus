@@ -86,7 +86,7 @@ class Jobstatusdata
     attributes.push Attribute.new "Virtual Memory", info.native.fetch(:resources_used, {})[:vmem].presence || "0 b"
     attributes.push Attribute.new "Comment", info.native[:comment] if info.native[:comment]
     attributes.push Attribute.new "Submission Time", self.submission_time 
-    attributes.push Attribute.new "Queued Time", self.queued_time || "00:00:00"
+    attributes.push Attribute.new "Time in Queue", self.queued_time || "00:00:00" 
     self.native_attribs = attributes
 
     self.submit_args = info.native[:submit_args].presence || "None"
@@ -123,7 +123,7 @@ class Jobstatusdata
     attributes.push Attribute.new "Time Used", info.native[:time_used]
     attributes.push Attribute.new "Memory", info.native[:min_memory]
     attributes.push Attribute.new "Submission Time", self.submission_time
-    attributes.push Attribute.new "Queued Time", self.queued_time || "00:00:00"
+    attributes.push Attribute.new "Time in Queue", self.queued_time || "00:00:00"
     self.native_attribs = attributes
 
     self.submit_args = nil
@@ -200,7 +200,7 @@ class Jobstatusdata
     attributes.push Attribute.new "Select", select if select
     attributes.push Attribute.new "Comment", info.native[:comment] || ''
     attributes.push Attribute.new "Submission Time", self.submission_time
-    attributes.push Attribute.new "Queued Time", self.queued_time || "00:00:00"
+    attributes.push Attribute.new "Time in Queue", self.queued_time || "00:00:00"
     self.native_attribs = attributes
     self.submit_args = info.native[:Submit_arguments].presence || "None"
     self.output_path = info.native[:Output_Path].to_s.split(":").second || info.native[:Output_Path]
