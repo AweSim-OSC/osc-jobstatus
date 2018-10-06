@@ -23,4 +23,8 @@ module ApplicationHelper
     end
     "<div style='white-space: nowrap;'><span class='label #{labelclass}'>#{label}</span></div>".html_safe
   end
+  
+  def support_url
+    ENV['OOD_DASHBOARD_SUPPORT_URL']
+  end
 end
