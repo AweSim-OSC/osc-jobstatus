@@ -17,6 +17,10 @@
         <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <span id="selected-cluster-label"></span> <span class="caret"></span>
         </button>
+        <script>
+          validClusters = <%= "#{OODClusters.map{|clust| clust.id.to_s}}".html_safe %>;
+          defaultCluster = 'all';
+        </script>
         <ul class="dropdown-menu">
           <% OODClusters.each do |cluster| %>
               <li class="cluster-dropdown-option" id="cluster-id-<%= cluster.id %>" onclick="set_cluster_id('<%= cluster.id %>');"><a href="#"><%= cluster.metadata.title || cluster.id.to_s.titleize %></a></li>
