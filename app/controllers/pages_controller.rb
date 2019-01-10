@@ -9,7 +9,8 @@ class PagesController < ApplicationController
   # Used to send the data to the Datatable.
   def json
     if params[:pbsid].nil?
-      render :json => get_jobs
+      jobs = get_jobs
+      render :json => Rack::MiniProfiler.step("render jobs as json"){ jobs.to_json }
     else
       #Only allow the configured servers to respond
       if cluster = OODClusters[params[:cluster].to_s.to_sym]
@@ -104,17 +105,19 @@ class PagesController < ApplicationController
             result = b.info_where_owner(OodSupport::User.new.name)
           else
             filter = Filter.list.find { |f| f.filter_id == jobfilter }
-            result = filter ? filter.apply(b.info_all) : b.info_all
+            result = Rack::MiniProfiler.step("#{cluster.id}.job_adapter#info_all") { filter ? filter.apply(b.info_all) : b.info_all }
           end
 
-          # Only add the running jobs to the list and assign the host to the object.
-          #
-          # There is also curently a bug in the system where jobs with an empty array
-          # (ex. 6407991[].oak-batch.osc.edu) are not stattable, so we do a not-match
-          # for those jobs and don't display them.
-          result.each do |j|
-            if j.status.state != :completed && j.id !~ /\[\]/
-              jobs.push(Jobstatusdata.new(j, cluster))
+          Rack::MiniProfiler.step("generate Jobstatusdata for #{result.count} results") do
+            # Only add the running jobs to the list and assign the host to the object.
+            #
+            # There is also curently a bug in the system where jobs with an empty array
+            # (ex. 6407991[].oak-batch.osc.edu) are not stattable, so we do a not-match
+            # for those jobs and don't display them.
+            result.each do |j|
+              if j.status.state != :completed && j.id !~ /\[\]/
+                jobs.push(Jobstatusdata.new(j, cluster))
+              end
             end
           end
         rescue => e
@@ -125,9 +128,11 @@ class PagesController < ApplicationController
       end
     end
 
-    # Sort jobs by username
-    jobs.sort_by! do |user|
-      user.username == OodSupport::User.new.name ? 0 : 1
+    Rack::MiniProfiler.step("sorting jobs by username") do
+      # Sort jobs by username
+      jobs.sort_by! do |user|
+        user.username == OodSupport::User.new.name ? 0 : 1
+      end
     end
 
     { data: jobs, errors: errors }

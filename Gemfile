@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 4.2.11'
+gem 'rails', '~> 4.2.10'
 
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
@@ -51,3 +51,6 @@ gem 'jquery-datatables-rails', '~> 3.3'
 
 # Security patches
 gem "rack", ">= 1.6.11"
+gem 'rack-mini-profiler'
+gem 'stackprof'
+gem 'flamegraph'
