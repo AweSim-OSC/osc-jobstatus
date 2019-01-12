@@ -10,7 +10,7 @@ class PagesController < ApplicationController
   def json
     if params[:pbsid].nil?
       jobs = get_jobs
-      render :json => Rack::MiniProfiler.step("render jobs as json"){ jobs.to_json }
+      render :json => Rack::MiniProfiler.step("render #{jobs[:data].count} jobs as json"){ jobs.to_json }
     else
       #Only allow the configured servers to respond
       if cluster = OODClusters[params[:cluster].to_s.to_sym]
@@ -102,39 +102,64 @@ class PagesController < ApplicationController
 
         begin
           if jobfilter == 'user'
-            result = b.info_where_owner(OodSupport::User.new.name)
+            jobs = convert_info(b.info_where_owner(OodSupport::User.new.name), cluster)
           else
             filter = Filter.list.find { |f| f.filter_id == jobfilter }
-            result = Rack::MiniProfiler.step("#{cluster.id}.job_adapter#info_all") { filter ? filter.apply(b.info_all) : b.info_all }
-          end
-
-          Rack::MiniProfiler.step("generate Jobstatusdata for #{result.count} results") do
-            # Only add the running jobs to the list and assign the host to the object.
-            #
-            # There is also curently a bug in the system where jobs with an empty array
-            # (ex. 6407991[].oak-batch.osc.edu) are not stattable, so we do a not-match
-            # for those jobs and don't display them.
-            result.each do |j|
-              if j.status.state != :completed && j.id !~ /\[\]/
-                jobs.push(Jobstatusdata.new(j, cluster))
+            Rack::MiniProfiler.step("#{cluster.id}.job_adapter#info_all") do
+              if filter
+                jobs += convert_info(filter.apply(b.info_all), cluster)
+              else
+                jobs +=  convert_info(b.info_all, cluster)
               end
             end
           end
-        rescue => e
-          msg = "#{cluster.metadata.title || cluster.id.to_s.titleize}: #{e.message}"
-          logger.error "#{e.class}: #{e.message}\n#{e.backtrace.join("\n")}"
-          errors << msg
         end
       end
     end
 
-    Rack::MiniProfiler.step("sorting jobs by username") do
-      # Sort jobs by username
-      jobs.sort_by! do |user|
-        user.username == OodSupport::User.new.name ? 0 : 1
-      end
-    end
-
     { data: jobs, errors: errors }
+  end
+
+  def convert_info(info_all, cluster)
+    info_all.map { |j|
+      {
+        cluster_title: cluster.metadata.title || cluster.id.to_s.titleize,
+        status: status_for_job(j),
+        cluster: cluster.id.to_s,
+        pbsid: j.id,
+        jobname: j.job_name,
+        account: j.accounting_id,
+        queue: j.queue_name,
+        walltime_used: j.wallclock_time
+      }
+    }
+  end
+
+  def status_for_job(job)
+    status_label(job.status.state.to_s)
+  end
+
+  def status_label(status)
+    case status
+    when "completed"
+      label = "Completed"
+      labelclass = "label-success"
+    when "running"
+      label = "Running"
+      labelclass = "label-primary"
+    when "queued"
+      label = "Queued"
+      labelclass = "label-info"
+    when "queued_held"
+      label = "Hold"
+      labelclass = "label-warning"
+    when "suspended"
+      label = "Suspend"
+      labelclass = "label-warning"
+    else
+      label = "Undetermined"
+      labelclass = "label-default"
+    end
+    "<div style='white-space: nowrap;'><span class='label #{labelclass}'>#{label}</span></div>".html_safe
   end
 end
