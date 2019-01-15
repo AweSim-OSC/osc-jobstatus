@@ -7,6 +7,11 @@ OODClusters = OodCore::Clusters.new(
 
 OODClusters.each(&:job_adapter)
 
+# make copies of owens cluster to get 20,000 jobs
+19.times do |x|
+  OODClusters = OodCore::Clusters.new(OODClusters.to_a + [OodCore::Cluster.new(OODClusters[:owens].to_h.merge({id: :"owens#{x}", metadata: {title: "Owens#{x}"} }))])
+end
+
 # require "ood_core/job/adapters/torque/error"
 # require "ood_core/job/adapters/torque/attributes"
 # require "ood_core/job/adapters/torque/ffi"
