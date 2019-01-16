@@ -4,23 +4,26 @@ class PagesController < ApplicationController
   def index
     @jobfilter = get_filter
     @jobcluster = get_cluster
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.json {
+        jobs = get_jobs
+        render :json => Rack::MiniProfiler.step("render #{jobs[:data].count} jobs as json"){ jobs.to_json }
+      }
+    end
   end
 
   # Used to send the data to the Datatable.
   def json
-    if params[:pbsid].nil?
-      jobs = get_jobs
-      render :json => Rack::MiniProfiler.step("render #{jobs[:data].count} jobs as json"){ jobs.to_json }
+    #Only allow the configured servers to respond
+    if cluster = OODClusters[params[:cluster].to_s.to_sym]
+      render '/pages/extended_data', :locals => {:jobstatusdata => get_job(params[:pbsid], cluster) }
     else
-      #Only allow the configured servers to respond
-      if cluster = OODClusters[params[:cluster].to_s.to_sym]
-        render '/pages/extended_data', :locals => {:jobstatusdata => get_job(params[:pbsid], cluster) }
-      else
-        msg = "Request did not specify an available cluster. "
-        msg += "Available clusters are: #{OODClusters.map(&:id).join(',')} "
-        msg += "But specified cluster is: #{params[:cluster]}"
-        render :json => { name: params[:pbsid], error: msg }
-      end
+      msg = "Request did not specify an available cluster. "
+      msg += "Available clusters are: #{OODClusters.map(&:id).join(',')} "
+      msg += "But specified cluster is: #{params[:cluster]}"
+      render :json => { name: params[:pbsid], error: msg }
     end
   end
 
