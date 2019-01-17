@@ -22,6 +22,10 @@ class JobsController < ApplicationController
           # FIXME: https://en.m.wikipedia.org/wiki/JSON_streaming
           # instead of a single valid json object, it might be preferable to stream
           # objects using "line-delimited JSON" or "Concatonated JSON" and then
+          # see also
+          # https://davidwalsh.name/streaming-data-fetch-ndjson
+          # http://ndjson.org/
+          # this is much simpler, though we would need to handle {error: ""} vs [{},{}] vs {}\n{}\n of jobs
           response.stream.write '{"data":[' # data is now an array of arrays
           clusters.each_with_index do |cluster, index|
             job_info = job_filter.user? ? cluster.job_adapter.info_where_owner(OodSupport::User.new.name) : cluster.job_adapter.info_all
