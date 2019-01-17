@@ -1,5 +1,6 @@
 class JobsController < ApplicationController
   include ApplicationHelper
+  include ActionController::Live
 
   def index
     @jobfilter = get_filter
@@ -8,19 +9,31 @@ class JobsController < ApplicationController
     respond_to do |format|
       format.html # index.html.erb
       format.json {
-        jobs = []
+        response.content_type = Mime[:json]
+
         errors = []
         job_filter = Filter.list.find(Filter.all_filter) { |f| f.filter_id == @jobfilter }
         #FIXME: clusters = @jobcluster == 'all' ? OODClusters : OODClusters.select {|cluster| cluster.id == @jobcluster }
         clusters = OODClusters.select { |cluster| @jobcluster == 'all' || cluster == OODClusters[@jobcluster]  }
 
         # FIXME: handle exceptions from info_where_owner, info_all calls
-        clusters.each do |cluster|
-          job_info = job_filter.user? ? cluster.job_adapter.info_where_owner(OodSupport::User.new.name) : cluster.job_adapter.info_all
-          jobs += convert_info(job_filter.apply(job_info), cluster)
-        end
+        begin
 
-        render :json => Rack::MiniProfiler.step("render #{jobs.count} jobs as json"){ { data: jobs, errors: errors }.to_json }
+          # FIXME: https://en.m.wikipedia.org/wiki/JSON_streaming
+          # instead of a single valid json object, it might be preferable to stream
+          # objects using "line-delimited JSON" or "Concatonated JSON" and then
+          response.stream.write '{"data":[' # data is now an array of arrays
+          clusters.each_with_index do |cluster, index|
+            job_info = job_filter.user? ? cluster.job_adapter.info_where_owner(OodSupport::User.new.name) : cluster.job_adapter.info_all
+            jobs = convert_info(job_filter.apply(job_info), cluster)
+
+            response.stream.write "," if index > 0
+            response.stream.write jobs.to_json
+          end
+          response.stream.write '], "errors":[]}'
+        ensure
+          response.stream.close
+        end
       }
     end
   end
