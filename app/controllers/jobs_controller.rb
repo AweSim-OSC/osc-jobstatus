@@ -124,6 +124,8 @@ class JobsController < ApplicationController
   end
 
   def convert_info(info_all, cluster)
+    extended_available = %w(torque slurm lsf pbspro).include?(cluster.job_config[:adapter])
+
     info_all.map { |j|
       {
         cluster_title: cluster.metadata.title || cluster.id.to_s.titleize,
@@ -134,7 +136,8 @@ class JobsController < ApplicationController
         account: j.accounting_id,
         queue: j.queue_name,
         walltime_used: j.wallclock_time,
-        username: j.job_owner
+        username: j.job_owner,
+        extended_available: extended_available
       }
     }
   end
