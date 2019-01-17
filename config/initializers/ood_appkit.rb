@@ -19,7 +19,14 @@ end
 
 class OodCore::Job::Adapters::Torque::Batch
   alias_method :orig_get_jobs, :get_jobs
-  def get_jobs(id: '', filters: [ :job_state, :queue, :Job_Name, :Account_Name, :job_id, :resources_used ])
+
+  #FIXME: since the filters could be a mixture of Info and attribute specific fields,
+  # we should allow both of these keys in the array
+  # so :jobname => :Job_Name but :egroup isn't in Info key list so its just :egroup
+  #
+  # Also the info_hash should have a native: {} and then attributes specified
+
+  def get_jobs(id: '', filters: [ :job_state, :queue, :Job_Name, :Account_Name, :job_id, :resources_used, :Job_Owner, :egroup ])
     orig_get_jobs(id: id, filters: filters)
   end
 end
@@ -28,3 +35,16 @@ end
 Rails.application.config.to_prepare do
   ::Rack::MiniProfiler.profile_method(OodCore::Job::Adapters::Torque::Batch, :get_jobs) { |a| "Torque::Batch#get_jobs"  }
 end
+
+# example filter for a single user's jobs
+Filter.list << Filter.new(
+  title: "osu9725 Jobs",
+  filter_id: "osu9725"
+) { |job| job.job_owner == 'osu9725' }
+
+# example filter for a groups
+group = OodSupport::User.new.group.name
+Filter.list << Filter.new(
+  title: "Your Group's Jobs (#{group})",
+  filter_id: "group"
+) { |job| job.native[:egroup] == group }
