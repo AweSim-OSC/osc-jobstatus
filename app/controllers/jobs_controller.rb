@@ -133,7 +133,8 @@ class JobsController < ApplicationController
         jobname: j.job_name,
         account: j.accounting_id,
         queue: j.queue_name,
-        walltime_used: j.wallclock_time
+        walltime_used: j.wallclock_time,
+        username: j.job_owner
       }
     }
   end
