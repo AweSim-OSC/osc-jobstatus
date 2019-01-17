@@ -11,13 +11,13 @@ class JobsController < ApplicationController
         jobs = []
         errors = []
         job_filter = Filter.list.find(Filter.all_filter) { |f| f.filter_id == @jobfilter }
+        #FIXME: clusters = @jobcluster == 'all' ? OODClusters : OODClusters.select {|cluster| cluster.id == @jobcluster }
+        clusters = OODClusters.select { |cluster| @jobcluster == 'all' || cluster == OODClusters[@jobcluster]  }
 
-        OODClusters.each do |cluster|
-          if @jobcluster == 'all' || cluster == OODClusters[@jobcluster]
-            # FIXME: handle exceptions from info_where_owner, info_all calls
-            job_info = job_filter.user? ? cluster.job_adapter.info_where_owner(OodSupport::User.new.name) : cluster.job_adapter.info_all
-            jobs += convert_info(job_filter.apply(job_info), cluster)
-          end
+        # FIXME: handle exceptions from info_where_owner, info_all calls
+        clusters.each do |cluster|
+          job_info = job_filter.user? ? cluster.job_adapter.info_where_owner(OodSupport::User.new.name) : cluster.job_adapter.info_all
+          jobs += convert_info(job_filter.apply(job_info), cluster)
         end
 
         render :json => Rack::MiniProfiler.step("render #{jobs.count} jobs as json"){ { data: jobs, errors: errors }.to_json }
