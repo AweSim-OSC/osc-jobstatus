@@ -8,8 +8,27 @@ class JobsController < ApplicationController
     respond_to do |format|
       format.html # index.html.erb
       format.json {
-        jobs = get_jobs
-        render :json => Rack::MiniProfiler.step("render #{jobs[:data].count} jobs as json"){ jobs.to_json }
+        jobs = Array.new
+        errors = Array.new
+        jobcluster = get_cluster
+        jobfilter_id = get_filter
+        job_filter = Filter.list.find(Filter.all_filter) { |f| f.filter_id == jobfilter_id }
+
+        OODClusters.each do |cluster|
+          if jobcluster == 'all' || cluster == OODClusters[jobcluster]
+            # FIXME: handle exceptions from info_where_owner, info_all calls
+
+            if job_filter.user?
+              jobs += convert_info(cluster.job_adapter.info_where_owner(OodSupport::User.new.name), cluster)
+            else
+              Rack::MiniProfiler.step("#{cluster.id}.job_adapter#info_all") do
+                jobs += convert_info(job_filter.apply(cluster.job_adapter.info_all), cluster)
+              end
+            end
+          end
+        end
+
+        render :json => Rack::MiniProfiler.step("render #{jobs.count} jobs as json"){ { data: jobs, errors: errors }.to_json }
       }
     end
   end
@@ -88,31 +107,6 @@ class JobsController < ApplicationController
     if params[:jobcluster] && (OODClusters[params[:jobcluster]] || params[:jobcluster] == 'all')
       params[:jobcluster]
     end
-  end
-
-  # Get a set of jobs defined by the filtering parameter.
-  def get_jobs
-    jobs = Array.new
-    errors = Array.new
-    jobcluster = get_cluster
-    jobfilter_id = get_filter
-    job_filter = Filter.list.find(Filter.all_filter) { |f| f.filter_id == jobfilter_id }
-
-    OODClusters.each do |cluster|
-      if jobcluster == 'all' || cluster == OODClusters[jobcluster]
-        # FIXME: handle exceptions from info_where_owner, info_all calls
-
-        if job_filter.user?
-          jobs += convert_info(cluster.job_adapter.info_where_owner(OodSupport::User.new.name), cluster)
-        else
-          Rack::MiniProfiler.step("#{cluster.id}.job_adapter#info_all") do
-            jobs += convert_info(job_filter.apply(cluster.job_adapter.info_all), cluster)
-          end
-        end
-      end
-    end
-
-    { data: jobs, errors: errors }
   end
 
   def convert_info(info_all, cluster)
