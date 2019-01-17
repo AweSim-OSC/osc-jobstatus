@@ -33,7 +33,8 @@ end
 
 
 Rails.application.config.to_prepare do
-  ::Rack::MiniProfiler.profile_method(OodCore::Job::Adapters::Torque::Batch, :get_jobs) { |a| "Torque::Batch#get_jobs"  }
+  ::Rack::MiniProfiler.profile_method(OodCore::Job::Adapters::Torque::Batch, :get_jobs) { "Torque::Batch#get_jobs"  }
+  ::Rack::MiniProfiler.profile_method(OodCore::Job::Adapters::Torque, :info_all) { "info_all called"  }
 end
 
 # example filter for a single user's jobs

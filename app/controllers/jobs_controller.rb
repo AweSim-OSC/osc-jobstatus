@@ -8,23 +8,15 @@ class JobsController < ApplicationController
     respond_to do |format|
       format.html # index.html.erb
       format.json {
-        jobs = Array.new
-        errors = Array.new
-        jobcluster = get_cluster
-        jobfilter_id = get_filter
-        job_filter = Filter.list.find(Filter.all_filter) { |f| f.filter_id == jobfilter_id }
+        jobs = []
+        errors = []
+        job_filter = Filter.list.find(Filter.all_filter) { |f| f.filter_id == @jobfilter }
 
         OODClusters.each do |cluster|
-          if jobcluster == 'all' || cluster == OODClusters[jobcluster]
+          if @jobcluster == 'all' || cluster == OODClusters[@jobcluster]
             # FIXME: handle exceptions from info_where_owner, info_all calls
-
-            if job_filter.user?
-              jobs += convert_info(cluster.job_adapter.info_where_owner(OodSupport::User.new.name), cluster)
-            else
-              Rack::MiniProfiler.step("#{cluster.id}.job_adapter#info_all") do
-                jobs += convert_info(job_filter.apply(cluster.job_adapter.info_all), cluster)
-              end
-            end
+            job_info = job_filter.user? ? cluster.job_adapter.info_where_owner(OodSupport::User.new.name) : cluster.job_adapter.info_all
+            jobs += convert_info(job_filter.apply(job_info), cluster)
           end
         end
 
