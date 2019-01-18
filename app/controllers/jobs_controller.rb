@@ -18,7 +18,6 @@ class JobsController < ApplicationController
 
         # FIXME: handle exceptions from info_where_owner, info_all calls
         begin
-
           # FIXME: https://en.m.wikipedia.org/wiki/JSON_streaming
           # instead of a single valid json object, it might be preferable to stream
           # objects using "line-delimited JSON" or "Concatonated JSON" and then
@@ -28,11 +27,13 @@ class JobsController < ApplicationController
           # this is much simpler, though we would need to handle {error: ""} vs [{},{}] vs {}\n{}\n of jobs
           response.stream.write '{"data":[' # data is now an array of arrays
           clusters.each_with_index do |cluster, index|
-            job_info = job_filter.user? ? cluster.job_adapter.info_where_owner(OodSupport::User.new.name) : cluster.job_adapter.info_all
-            jobs = convert_info(job_filter.apply(job_info), cluster)
+            job_info_enumerator = job_filter.user? ? cluster.job_adapter.info_where_owner_each(OodSupport::User.new.name) : cluster.job_adapter.info_all_each
+            job_info_enumerator.each_slice(1000) do |jobs|
+              response.stream.write "," if index > 0
+              response.stream.write convert_info(job_filter.apply(jobs), cluster).to_json
 
-            response.stream.write "," if index > 0
-            response.stream.write jobs.to_json
+              Rails.logger.debug "wrote jobs to stream: #{jobs.count}"
+            end
           end
           response.stream.write '], "errors":[]}'
         ensure

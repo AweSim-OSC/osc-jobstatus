@@ -1,3 +1,12 @@
+GIT
+  remote: git://github.com/osc/ood_core.git
+  revision: 5d4f42e537f09a81ad079f9751543bd7f337dad2
+  branch: perf
+  specs:
+    ood_core (0.7.1)
+      ffi (~> 1.9, >= 1.9.6)
+      ood_support (~> 0.0.2)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -102,9 +111,6 @@ GEM
       redcarpet (~> 3.2)
     ood_cluster (0.0.1)
       addressable (~> 2.4)
-    ood_core (0.7.0)
-      ffi (~> 1.9, >= 1.9.6)
-      ood_support (~> 0.0.2)
     ood_support (0.0.3)
     pbs (2.2.1)
       ffi (~> 1.9, >= 1.9.6)
@@ -195,6 +201,7 @@ DEPENDENCIES
   jquery-rails
   ood_appkit (~> 1.0)
   ood_cluster (~> 0.0.1)
+  ood_core!
   pbs (~> 2.2.1)
   rack (>= 1.6.11)
   rack-mini-profiler

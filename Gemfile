@@ -54,3 +54,4 @@ gem "rack", ">= 1.6.11"
 gem 'rack-mini-profiler'
 gem 'stackprof'
 gem 'flamegraph'
+gem 'ood_core', github: 'osc/ood_core', branch: 'perf'
