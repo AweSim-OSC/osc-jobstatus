@@ -25,14 +25,16 @@ class JobsController < ApplicationController
           # https://davidwalsh.name/streaming-data-fetch-ndjson
           # http://ndjson.org/
           # this is much simpler, though we would need to handle {error: ""} vs [{},{}] vs {}\n{}\n of jobs
-          response.stream.write '{"data":[' # data is now an array of arrays
-          clusters.each_with_index do |cluster, index|
+          count = 0
+          response.stream.write '{"jobs":[' # data is now an array of arrays
+          clusters.each_with_index do |cluster|
             job_info_enumerator = job_filter.user? ? cluster.job_adapter.info_where_owner_each(OodSupport::User.new.name) : cluster.job_adapter.info_all_each
-            job_info_enumerator.each_slice(1000) do |jobs|
-              response.stream.write "," if index > 0
+            job_info_enumerator.each_slice(3000) do |jobs|
+              response.stream.write "," if count > 0
               response.stream.write convert_info(job_filter.apply(jobs), cluster).to_json
 
               Rails.logger.debug "wrote jobs to stream: #{jobs.count}"
+              count += 1;
             end
           end
           response.stream.write '], "errors":[]}'
@@ -43,21 +45,25 @@ class JobsController < ApplicationController
     end
   end
 
-  # Used to send the data to the Datatable.
-  def json
-    #Only allow the configured servers to respond
-    if cluster = OODClusters[params[:cluster].to_s.to_sym]
-      render '/jobs/extended_data', :locals => {:jobstatusdata => get_job(params[:pbsid], cluster) }
-    else
-      msg = "Request did not specify an available cluster. "
-      msg += "Available clusters are: #{OODClusters.map(&:id).join(',')} "
-      msg += "But specified cluster is: #{params[:cluster]}"
-      render :json => { name: params[:pbsid], error: msg }
+  def show
+    respond_to do |format|
+      format.html { # show.html.erb
+        raise ActionController::RoutingError.new('Not Found')
+      }
+      format.json {
+        if cluster = OODClusters[params[:cluster].to_s.to_sym]
+          render '/jobs/extended_data', :locals => {:jobstatusdata => get_job(params[:id], cluster) }
+        else
+          msg = "Request did not specify an available cluster. "
+          msg += "Available clusters are: #{OODClusters.map(&:id).join(',')} "
+          msg += "But specified cluster is: #{params[:cluster]}"
+          render :json => { name: params[:pbsid], error: msg }
+        end
+      }
     end
   end
 
-  def delete_job
-
+  def destroy
     # Only delete if the pbsid and host params are present and host is configured in servers.
     # PBS will prevent a user from deleting a job that is not their own and throw an error.
     cluster = OODClusters[params[:cluster].to_sym]
@@ -75,7 +81,7 @@ class JobsController < ApplicationController
         redirect_to root_url, :alert => "Failed to delete " + job_id
       end
     else
-      redirect_to root_url, :alert => "Failed to delete."
+      redirect_to root_url, :alert => "Failed to delete job as a valid job id cluster was not specified"
     end
   end
 
