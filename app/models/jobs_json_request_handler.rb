@@ -9,7 +9,7 @@ class JobsJsonRequestHandler
     @cluster_id = cluster_id
     @controller = controller
     @params = params
-    @response = response
+    @response = response 
   end
 
   def filter
@@ -26,42 +26,44 @@ class JobsJsonRequestHandler
     end
   end
 
-  def job_info_enumerator(cluster)
+  def job_info_enumerator(cluster) 
     if filter.user?
       cluster.job_adapter.info_where_owner_each(OodSupport::User.new.name, attrs: JOB_ATTRS)
     else
       cluster.job_adapter.info_all_each(attrs: JOB_ATTRS)
     end
-  end
+  end 
 
   def render
     response.content_type = Mime[:json]
 
     errors = []
-    count = 0
-    response.stream.write '{"data":[' # data is now an array of arrays']}'
+    count = 0 
 
     clusters.each_with_index do |cluster|
       begin
         job_info_enumerator(cluster).each_slice(3000) do |jobs|
           jobs = convert_info_filtered(filter.apply(jobs), cluster)
+          
+          jobs.each do |job|
 
-          response.stream.write "," if count > 0
-          response.stream.write jobs.to_json
+           response.stream.write job.to_json + "\n"
+          end
 
           controller.logger.debug "wrote jobs to stream: #{jobs.count}"
-          count += 1;
+          count += 1;  
         end
       rescue => e
         msg = "#{cluster.metadata.title || cluster.id.to_s.titleize}: #{e.message}"
         controller.logger.error "#{e.class}: #{e.message}\n#{e.backtrace.join("\n")}"
-        errors << msg
+        errors << msg 
       end
-    end
+    end  
 
     errors << "No clusters found for cluster id: #{cluster_id}" if clusters.to_a.empty?
-
-    response.stream.write '], "errors":' + errors.to_json + '}'
+    if (errors.length > 0 ) 
+      response.stream.write errors.to_json
+    end
   ensure
     response.stream.close
   end
