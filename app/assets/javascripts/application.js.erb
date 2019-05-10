@@ -38,7 +38,7 @@ function handleResponseErrors(response) {
     }
     return response;
 }
-//check if errors are in the response
+//write jobs to the table or display an error if the response is not an array
 function processJobsNdjsonObject(obj) {
     if (Array.isArray(obj)) {
         table.rows.add(obj).draw()
@@ -75,8 +75,10 @@ function fetch_table_data(table, options){
             }
             return;
         }
-        //result.value is the json response
+
+        //result.value is an object from a single line of json that is an ndjson formatted response body
         processJobsNdjsonObject(result.value);
+        
         //recurse through stream
         reader.read().then( read );
     })
