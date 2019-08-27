@@ -11,7 +11,7 @@
 // about supported directives.
 //
 //= require promise/promise
-//= require fetchpoly/fetch
+//= require fetchpoly/fetch.umd
 //= require jquery
 //= require jquery_ujs
 //= require bootstrap-sprockets
@@ -56,38 +56,38 @@ function fetch_table_data(table, options){
   if (!options.base_uri) options.base_uri = window.location.pathname;
 
   fetch(options.base_uri + '/jobs.json?' + get_request_params(), {
-    headers: {
-        'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content'),
-        'X-Requested-With': 'XMLHttpRequest',
-        'Content-Type': 'application/json'
-    }
-  })
-  .then(handleResponseErrors)
-  .then((response) => {
-    table.processing(true);
-    return ndjsonStream(response.body);
-  })
-  .then((stream) => {
-    const reader = stream.getReader();
-    let read;
-    reader.read().then(read = (result) => {
-        if (result.done) {
-            table.processing(false);
-            if (options.doneCallback) {
-                options.doneCallback();
-            }
-            return;
-        }
+  headers: {
+    'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content'),
+    'X-Requested-With': 'XMLHttpRequest',
+    'Content-Type': 'application/json'
+  }
+}).then(handleResponseErrors).then(function (response) {
+  table.processing(true);
+  return ndjsonStream(response.body);
+}).then(function (stream) {
+  var reader = stream.getReader();
 
-        //result.value is an object from a single line of json that is an ndjson formatted response body
-        processJobsNdjsonObject(result.value);
-        
-        //recurse through stream
-        reader.read().then( read );
-    })
-  }).catch(e => {
-    show_errors(["An error occured, " + e]);
-  })
+  var _read;
+
+  reader.read().then(_read = function read(result) {
+    if (result.done) {
+      table.processing(false);
+
+      if (options.doneCallback) {
+        options.doneCallback();
+      }
+
+      return;
+    } //result.value is an object from a single line of json that is an ndjson formatted response body
+
+
+    processJobsNdjsonObject(result.value); //recurse through stream
+
+    reader.read().then(_read);
+  });
+}).catch(function (e) {
+  show_errors(["An error occured, " + e]);
+});
 }
 
 function status_label(status){
