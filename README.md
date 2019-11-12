@@ -1,3 +1,5 @@
+## Moved to https://github.com/OSC/ondemand/tree/master/apps/activejobs
+
 # OOD Active Jobs
 
 ![GitHub Release](https://img.shields.io/github/release/osc/ood-activejobs.svg)
